@@ -1,0 +1,14 @@
+{
+    "autoload": {
+        "classmap": [
+            "./"
+        ],
+        "namespaces": {
+            "App": "./app/",
+            "Core": "./app/core/",
+            "Controllers": "./app/controllers/",
+            "Models": "./app/models/",
+            "Helpers": "./app/helpers/"
+        }
+    }
+}
