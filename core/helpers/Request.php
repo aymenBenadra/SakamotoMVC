@@ -2,8 +2,32 @@
 
 namespace Core\Helpers;
 
+/**
+ * Request Helper Class
+ * - Get Request URI
+ * - Get Request Method
+ * - Get Request Data (POST, GET)
+ * 
+ * @package Core\Helpers
+ * @author Mohammed-Aymen Benadra
+ */
 class Request
 {
+    public $uri;
+    public $method;
+    public $data;
+
+    /**
+     * Create a new Request instance from the current request.
+     * 
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->uri = self::uri();
+        $this->method = self::method();
+        $this->data = self::data();
+    }
     /**
      * Fetch the request URI.
      *
@@ -40,19 +64,50 @@ class Request
                 return empty($_GET) ? [] : $_GET;
                 break;
             case 'POST':
-                return $_POST;
+                $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                return empty($_FILES) ? $data : array_merge($data, $_FILES);
                 break;
-            // case 'PUT':
-            //     parse_str(file_get_contents('php://input'), $_PUT);
-            //     return $_PUT;
-            //     break;
-            // case 'DELETE':
-            //     parse_str(file_get_contents('php://input'), $_DELETE);
-            //     return $_DELETE;
-            //     break;
+            case 'PUT':
+                return json_decode(file_get_contents('php://input'), true);
+                break;
+            case 'DELETE':
+                return json_decode(file_get_contents('php://input'), true);
+                break;
             default:
                 return [];
                 break;
         }
+    }
+
+    /**
+     * Get header value
+     * 
+     * @param  string $header
+     * @return string
+     */
+    public static function header($header)
+    {
+        $header = strtoupper($header);
+        $header = str_replace('-', '_', $header);
+
+        return $_SERVER['HTTP_' . $header] ?? null;
+    }
+
+
+    /**
+     * Get Authorization header value.
+     * 
+     * @return string
+     */
+    public static function authorization()
+    {
+        // Get authorization token from header
+        $auth = isset($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches) ? $matches[1] : null;
+
+        // If no authorization token, get it from cookie
+        if (!$auth) {
+            $auth = isset($_COOKIE['jwt']) ? $_COOKIE['jwt'] : null;
+        }
+        return $auth ?? false;
     }
 }
