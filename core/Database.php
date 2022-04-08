@@ -12,19 +12,15 @@ use PDO, PDOException;
  * - Return rows and results
  *
  * @author 		Mohammed-Aymen Benadra
+ * @uses 		PDO, PDOException
  * @package 	Core
  */
 class Database
 {
-    private $host = DB_HOST;
-    private $user = DB_USER;
-    private $pass = DB_PASS;
-    private $dbname = DB_NAME;
-
     private $dbh;
     private $stmt;
     private $error;
-    
+
     /**
      * Create database connection
      *
@@ -32,7 +28,7 @@ class Database
      */
     public function __construct()
     {
-        $dsn = "mysql:host=$this->host;dbname=$this->dbname;";
+        $dsn = "mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']};";
         $options = array(
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -40,13 +36,13 @@ class Database
         );
 
         try {
-            $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+            $this->dbh = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS'], $options);
         } catch (PDOException $e) {
             $this->error = $e->getMessage();
             echo $this->error;
         }
     }
-    
+
     /**
      * Prepare statement with query
      *
@@ -57,7 +53,7 @@ class Database
     {
         $this->stmt = $this->dbh->prepare($sql);
     }
-    
+
     /**
      * Bind Params with Values
      *
@@ -87,7 +83,7 @@ class Database
 
         $this->stmt->bindValue($param, $value, $type);
     }
-   
+
     /**
      * Executes the prepared statement
      *
@@ -103,7 +99,7 @@ class Database
             return false;
         }
     }
-    
+
     /**
      * Get all records as array of objects
      *
@@ -114,7 +110,7 @@ class Database
         $this->execute();
         return $this->stmt->fetchAll();
     }
-     
+
     /**
      * Get single record as object
      *
@@ -125,7 +121,7 @@ class Database
         $this->execute();
         return $this->stmt->fetch();
     }
-    
+
     /**
      * Get number of records
      *
@@ -136,7 +132,7 @@ class Database
         $this->execute();
         return $this->stmt->rowCount();
     }
-    
+
     /**
      * Get last inserted id
      *
@@ -146,7 +142,7 @@ class Database
     {
         return $this->dbh->lastInsertId();
     }
-    
+
     /**
      * Get error
      *
