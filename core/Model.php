@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use Exception;
+
 /**
  * Model Class
  * - Initialize the database connection
@@ -17,21 +19,58 @@ abstract class Model
 {
     protected $db;
     protected $table;
-    
+    protected $schema;
+
     /**
-     * Initialize the database connection
+     * Initialize the database connection and set schema of the table
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($schema)
     {
         $this->db = new Database;
+        $this->schema = $schema;
     }
-    
+
+    /**
+     * Return schema of the table
+     * 
+     * @param ?array $fields
+     * @return array
+     * @throws Exception
+     */
+    public function getSchema(...$fields)
+    {
+        if ($fields) {
+            $schema = [];
+            foreach ($fields as $field) {
+                if (array_key_exists($field, $this->schema)) {
+                    $schema[$field] = $this->schema[$field];
+                } else {
+                    throw new Exception("Field $field does not exist in schema");
+                }
+            }
+            return $schema;
+        }
+        return $this->schema;
+    }
+
+    /**
+     * Return schema of required fields
+     * 
+     * @return array
+     */
+    public function getRequiredSchema()
+    {
+        return array_filter($this->schema, function ($value) {
+            return strpos($value, 'required') !== false;
+        });
+    }
+
     /**
      * Get single record from database
      *
-     * @param  mixed $id
+     * @param  int $id
      * @return object
      */
     public function get($id)
@@ -40,7 +79,23 @@ abstract class Model
         $this->db->bind(':id', $id);
         return $this->db->single();
     }
-    
+
+    /**
+     * get record by field
+     * 
+     * @param  string $field
+     * @param  mixed $value
+     * @return object
+     */
+    public function getBy($field, $value)
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE $field = :$field";
+        $this->db->query($sql);
+        $this->db->bind(":$field", $value);
+
+        return $this->db->single();
+    }
+
     /**
      * Get all records from database
      *
@@ -51,7 +106,23 @@ abstract class Model
         $this->db->query("SELECT * FROM $this->table");
         return $this->db->resultSet();
     }
-    
+
+    /**
+     * Get all records by field
+     *
+     * @param  string $field
+     * @param  string $value
+     * @return array
+     */
+    public function getAllBy($field, $value)
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE $field = :$field";
+        $this->db->query($sql);
+        $this->db->bind(":$field", $value);
+
+        return $this->db->resultSet();
+    }
+
     /**
      * Add new record to database
      *
@@ -75,7 +146,7 @@ abstract class Model
 
         return $this->db->execute();
     }
-    
+
     /**
      * Update record in database
      *
@@ -102,7 +173,7 @@ abstract class Model
 
         return $this->db->execute();
     }
-    
+
     /**
      * Delete record from database
      *
@@ -116,7 +187,7 @@ abstract class Model
 
         return $this->db->execute();
     }
-    
+
     /**
      * Get last inserted id
      *
