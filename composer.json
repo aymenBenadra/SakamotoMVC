@@ -21,18 +21,11 @@
     }
   ],
   "autoload": {
-    "classmap": [
-      "./"
-    ],
-    "namespaces": {
-      "App": "./app/",
-      "Controllers": "./app/controllers/",
-      "Models": "./app/models/",
-      "Core": "./core/",
-      "Helpers": "./core/helpers/",
-      "Middlewares": "./core/middlewares/",
-      "Firebase\\JWT": "./vendor/firebase/php-jwt/src/",
-      "Dotenv": "./vendor/vlucas/phpdotenv/src/"
+    "psr-4": {
+      "App\\": "./app/",
+      "Core\\": "./core/",
+      "Firebase\\JWT\\": "./vendor/firebase/php-jwt/src/",
+      "Dotenv\\": "./vendor/vlucas/phpdotenv/src/"
     }
   },
   "require": {

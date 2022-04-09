@@ -5,7 +5,7 @@ namespace App\Controllers;
 use Core\{Controller};
 
 /**
- * Posts Controller
+ * Examples Controller
  *
  * @author Mohammed-Aymen Benadra
  * @package App\Controllers

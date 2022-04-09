@@ -11,7 +11,7 @@ use Core\Helpers\Response;
  * @author Mohammed-Aymen Benadra
  * @package App\Controllers
  */
-class API extends Controller
+class Api extends Controller
 {
     private $model;
     /**
