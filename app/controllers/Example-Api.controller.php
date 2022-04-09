@@ -6,12 +6,12 @@ use Core\{Controller, Router};
 use Core\Helpers\Response;
 
 /**
- * Examples Controller
+ * API Controller
  *
  * @author Mohammed-Aymen Benadra
  * @package App\Controllers
  */
-class Examples extends Controller
+class API extends Controller
 {
     private $model;
     /**
