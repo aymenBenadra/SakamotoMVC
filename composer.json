@@ -1,4 +1,25 @@
 {
+  "name": "sakamoto/mvc",
+  "type": "template",
+  "description": "A project template close to how Laravel manages things to make creating new MVC projects with REST API and JWT support easier.",
+  "keywords": [
+    "template",
+    "project",
+    "php",
+    "jwt",
+    "api",
+    "rest",
+    "mvc"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mohammed-Aymen Benadra",
+      "email": "ayman.benadra16@gmail.com",
+      "homepage": "https://aymenbenadra.github.io/",
+      "role": "Full Stack Web Developer"
+    }
+  ],
   "autoload": {
     "classmap": [
       "./"
