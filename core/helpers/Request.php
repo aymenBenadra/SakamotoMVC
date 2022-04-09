@@ -35,10 +35,8 @@ class Request
      */
     public static function uri()
     {
-        return trim(
-            parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),
-            '/'
-        );
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        return $uri === '/' ? $uri : trim($uri, '/');
     }
 
     /**
@@ -110,7 +108,7 @@ class Request
         if (!$auth) {
             $auth = isset($_COOKIE['jwt']) ? $_COOKIE['jwt'] : null;
         }
-        
+
         return $auth ?? false;
     }
 }
