@@ -28,6 +28,26 @@ SakamotoMVC has a lot of features out of the box and it is easy to use and custo
 
 ## Installation
 
+### Install via Composer
+
+```bash
+composer create-project sakamoto/mvc [project-name] --stability dev
+```
+
+Navigate to the project folder:
+
+```bash
+> cd [project_name]
+```
+
+Install requirements:
+
+```bash
+> composer install
+```
+
+### Install via Github Cli
+
 Make sure you have PHP 8 or higher installed on your computer, install git and Github CLI (if you don't have it already).
 
 Login with your Github account:
