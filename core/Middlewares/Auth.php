@@ -5,6 +5,7 @@ namespace Core\Middlewares;
 use Core\Router;
 use Core\Helpers\Request;
 use App\Models\Example;
+use Core\Helpers\Response;
 use Firebase\JWT\{JWT, Key};
 use Exception;
 
@@ -20,6 +21,16 @@ use Exception;
  */
 class Auth
 {
+    /**
+     * Setup headers
+     * 
+     * @return void
+     */
+    public function __construct()
+    {
+        Response::headers();
+    }
+    
     /**
      * Handle Authentication using session
      * 

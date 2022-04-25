@@ -3,7 +3,7 @@
 namespace Core\Middlewares;
 
 use Core\Router;
-use Core\Helpers\{Request, Validator};
+use Core\Helpers\{Request, Response, Validator};
 
 /**
  * Verification class
@@ -25,6 +25,7 @@ class Validation
      */
     public function __construct()
     {
+        Response::headers();
         $this->rules = require_once '../app/config/validation-rules.php';
     }
 
