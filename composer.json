@@ -31,6 +31,7 @@
   },
   "require": {
     "firebase/php-jwt": "^6.1",
-    "vlucas/phpdotenv": "^5.4"
+    "vlucas/phpdotenv": "^5.4",
+    "psy/psysh": "@stable"
   }
 }

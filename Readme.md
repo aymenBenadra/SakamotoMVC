@@ -79,3 +79,16 @@ Install requirements:
 ```bash
 > composer install
 ```
+
+## Usage
+
+1. Specify the project name in the composer.json file.
+2. Add your routes in the routes.php file in the app/config directory of your project.
+3. Create a new model using the Example Model template.
+4. Create a new controller using the Example Controller template.
+5. Add your Views in the views directory of your project.
+6. optional: use the PsySH shell to test your project.
+
+    ```bash
+    php ./vendor/bin/psysh
+    ```
