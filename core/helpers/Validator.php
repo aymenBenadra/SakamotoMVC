@@ -171,11 +171,11 @@ class Validator
      */
     public static function int($value)
     {
-        if (!is_int($value)) {
-            return 'The value must be an integer';
+        if (is_numeric($value) && is_int((int)$value)) {
+            return true;
         }
 
-        return true;
+        return 'The value must be an integer';
     }
 
     /**
@@ -186,11 +186,11 @@ class Validator
      */
     public static function float($value)
     {
-        if (!is_float($value)) {
-            return 'The value must be a float';
+        if (is_numeric($value) && is_float((float)$value)) {
+            return true;
         }
 
-        return true;
+        return 'The value must be a float';
     }
 
     /**
@@ -261,11 +261,11 @@ class Validator
      */
     public static function file($value)
     {
-        if (!is_array($value) || !isset($value['tmp_name'])) {
-            return 'The value must be a file';
+        if (is_array($value) && isset($value['tmp_name'])) {
+            return true;
         }
 
-        return true;
+        return 'The value must be a file';
     }
 
     /**
