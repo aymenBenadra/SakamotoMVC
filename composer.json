@@ -21,6 +21,20 @@
       "role": "Full Stack Web Developer"
     }
   ],
+  "scripts": {
+    "report": [
+      "echo Today's report: %date% - %time% > report.txt & echo. >> report.txt",
+      "./vendor/bin/phploc . --exclude vendor >> report.txt"
+    ],
+    "report:csv": [
+      "echo Today's report: %date% - %time% > report.csv & echo. >> report.txt",
+      "./vendor/bin/phploc . --exclude vendor --log-csv=report.csv >> report.txt"
+    ]
+  },
+  "scripts-descriptions": {
+    "report": "Generate a report of the project's code summary.",
+    "report:csv": "Generate a report of the project's code summary in CSV format."
+  },
   "autoload": {
     "psr-4": {
       "App\\": "./app/",
@@ -33,6 +47,7 @@
     "firebase/php-jwt": "^6.1",
     "vlucas/phpdotenv": "^5.4",
     "psy/psysh": "@stable",
-    "jdenticon/jdenticon": "^1.0"
+    "jdenticon/jdenticon": "^1.0",
+    "phploc/phploc": "^7.0"
   }
 }

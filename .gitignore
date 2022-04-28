@@ -2,3 +2,5 @@ vendor/
 .env
 .idea/
 .vscode/
+report.txt
+report.csv
