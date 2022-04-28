@@ -133,7 +133,7 @@ abstract class Model
     {
         $params = array_keys($data);
 
-        $this->db->query("INSERT INTO $this->table (" . implode(",", $params) . ") VALUES (" . implode(",", array_map(
+        $this->db->query("INSERT INTO $this->table (`" . implode("`,`", $params) . "`) VALUES (" . implode(",", array_map(
             function ($param) {
                 return ":" . $param;
             },
@@ -158,9 +158,9 @@ abstract class Model
     {
         $params = array_keys($data);
 
-        $this->db->query("UPDATE $this->table SET " . implode(",", array_map(
+        $this->db->query("UPDATE $this->table SET `" . implode(",`", array_map(
             function ($param) {
-                return $param . " = :" . $param;
+                return $param . "` = :" . $param;
             },
             $params
         )) . " WHERE id = :id");
