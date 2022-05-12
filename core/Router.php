@@ -161,6 +161,7 @@ class Router
     {
         $middleware = explode('@', $middleware);
         $param = $middleware[1];
+        $scope = $middleware[2] ?? null;
 
         $middleware = "Core\\Middlewares\\{$middleware[0]}";
 
@@ -168,7 +169,9 @@ class Router
         $middleware = new $middleware;
 
         // Call the middleware method
-        if ($param) {
+        if ($param && $scope) {
+            $middleware->handle($param, $scope);
+        } elseif ($param && !$scope) {
             $middleware->handle($param);
         } else {
             $middleware->handle();
