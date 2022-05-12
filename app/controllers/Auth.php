@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Models\Example;
 use Core\{Controller, Router};
+use Core\Helpers\Request;
 use Core\Helpers\Response;
-use Firebase\JWT\{JWT};
+use Firebase\JWT\{JWT, Key};
 
 /**
  * Auth Controller
@@ -162,5 +164,19 @@ class Auth extends Controller
                 "jwt" => $jwt
             )
         );
+    }
+
+    /**
+     * Get current authenticated User
+     * 
+     * @return object
+     */
+    public static function user()
+    {
+        $jwt = Request::authorization();
+
+        $token = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], "HS256"));
+
+        return (new Example)->getBy('username', $token->sub);
     }
 }
