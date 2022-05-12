@@ -29,8 +29,16 @@ class Validator
             $ruleName = $rule[0];
             $ruleParam = $rule[1] ?? null;
 
+            if (isset($rule[1]) && strpos($rule[1], ',') !== false) {
+                $ruleParam = explode(',', $rule[1]);
+            }
+
             if (method_exists(__CLASS__, $ruleName)) {
-                $result = $ruleParam ? self::$ruleName($value, $ruleParam) : self::$ruleName($value);
+                $result = $ruleParam
+                    ? (is_array($ruleParam)
+                        ? self::$ruleName($value, $ruleParam[0], $ruleParam[1])
+                        : self::$ruleName($value, $ruleParam))
+                    : self::$ruleName($value);
 
                 if ($result !== true) {
                     $errors[] = $result;
@@ -346,6 +354,46 @@ class Validator
     {
         if ($value !== $param) {
             return 'The value is not the same as the parameter';
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if value exists in database and return error if not.
+     * 
+     * @param mixed $value
+     * @param string $model
+     * @param string $column
+     * @return string|bool
+     */
+    public static function exists($value, $model, $column = 'id')
+    {
+        $model = "App\\Models\\$model";
+        $model = new $model;
+
+        if (!$model->getBy($column, $value)) {
+            return 'Resource requested does not exist';
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if value is unique in database and return error if not.
+     * 
+     * @param mixed $value
+     * @param string $model
+     * @param string $column
+     * @return string|bool
+     */
+    public static function unique($value, $model, $column = 'id')
+    {
+        $model = "App\\Models\\$model";
+        $model = new $model;
+
+        if ($model->getBy($column, $value)) {
+            return 'The value is not unique';
         }
 
         return true;
