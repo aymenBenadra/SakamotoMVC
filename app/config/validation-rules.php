@@ -25,13 +25,21 @@ use App\Models\{Example};
  * ? - - same: Check if the field matches with the parameter provided
  * ? - - matches: Check if the field matches with the parameter provided
  * ? - - ip: Check if the field is an ip address
+ * ? - - exists: Check if the field exists in the database
+ * ? - - unique: Check if the field is unique in the database
  * 
  * @package App\Config
  * @author Mohammed-Aymen Benadra
  */
 
 $example = new Example();
+$example2 = new Example();
 
-return array_merge(
-    $example->getRequiredSchema()
-);
+$rules = [
+    "example" => $example->getRequiredSchema(),
+    "example2" => $example2->getRequiredSchema(),
+];
+
+$rules["all"] = $rules["example"] + $rules["example2"];
+
+return $rules;
