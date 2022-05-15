@@ -16,7 +16,7 @@ class Example extends Model
     public function __construct()
     {
         parent::__construct([
-            'exampleField' => 'required|numeric|min:1|max:10|int|float|bool|array|object|email|file|image|url|date|date_format|same|matches|ip'
+            'exampleField' => 'required|numeric|min:1|max:10|int|float|bool|array|object|email|file|image|url|date|date_format|same|matches|ip|exists:table,field|unique:table,field|regex:pattern'
         ]);
         $this->table = 'Examples';
     }
