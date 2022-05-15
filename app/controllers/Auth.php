@@ -65,13 +65,6 @@ class Auth extends Controller
     {
         $example = $this->model('Example')->getBy('headerRef', $data['headerRef']);
 
-        if (!$example) {
-            Router::abort(404, json_encode([
-                'status' => 'error',
-                'message' => 'example not found'
-            ]));
-        }
-
         Response::send([
             'status' => 'success',
             'data' => $example
@@ -86,15 +79,6 @@ class Auth extends Controller
      */
     public function registerJWT($data = [])
     {
-        $example = $this->model('Example')->getBy('username', $data['username']);
-
-        if ($example) {
-            Router::abort(400, json_encode([
-                'status' => 'error',
-                'message' => 'example already exists'
-            ]));
-        }
-
         // Hash password
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
@@ -123,13 +107,6 @@ class Auth extends Controller
     {
         $example = $this->model('Example')->getBy('username', $data['username']);
 
-        if (!$example) {
-            Router::abort(404, json_encode([
-                'status' => 'error',
-                'message' => 'example not found'
-            ]));
-        }
-
         if (!password_verify($data['password'], $example->password)) {
             Router::abort(401, json_encode([
                 'status' => 'error',
@@ -155,9 +132,8 @@ class Auth extends Controller
         $jwt = JWT::encode($payload, $secret_key, "HS256");
 
         // Set expirable cookie for JWT
-        setcookie('jwt', $jwt, $expire_claim, "/", $_ENV['SERVER_ADDRESS'], false, true);
+        setcookie(name: 'jwt', value: $jwt, expires_or_options: $expire_claim, httponly: true);
 
-        Response::code();
         Response::send(
             array(
                 "message" => "Successful login.",
@@ -167,13 +143,31 @@ class Auth extends Controller
     }
 
     /**
+     * Logout an User
+     * 
+     * @return void
+     */
+    public function logoutJWT()
+    {
+        setcookie(name: 'jwt', value: '', expires_or_options: time() - 3600, httponly: true);
+
+        Response::send([
+            'status' => 'Logged out successfully!'
+        ]);
+    }
+
+    /**
      * Get current authenticated User
      * 
      * @return object
      */
-    public static function user()
+    public static function userJWT()
     {
         $jwt = Request::authorization();
+
+        if (!$jwt) {
+            return null;
+        }
 
         $token = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], "HS256"));
 
