@@ -122,11 +122,13 @@ class Router
         }
 
         if (array_key_exists($request->uri, $this->routes[$request->method])) {
-            $uri = explode('@', $this->routes[$request->method][$request->uri]['route']);
+            if (!is_callable($this->routes[$request->method][$request->uri]['route'])) {
+                $uri = explode('@', $this->routes[$request->method][$request->uri]['route']);
 
-            // Load the controller
-            $controller = "App\\Controllers\\{$uri[0]}";
-            $method = $uri[1];
+                // Load the controller
+                $controller = "App\\Controllers\\{$uri[0]}";
+                $method = $uri[1];
+            }
 
             // Load the middlewares
             $middlewares = $this->routes[$request->method][$request->uri]['middlewares'] ?? [];
@@ -138,8 +140,14 @@ class Router
                 }
             }
 
-            $controller = new $controller;
+            if (is_callable($this->routes[$request->method][$request->uri]['route'])) {
+                Response::headers();
+                Response::code();
+                $this->routes[$request->method][$request->uri]['route']();
+                exit;
+            }
 
+            $controller = new $controller;
 
             $this->callAction(
                 $controller,
