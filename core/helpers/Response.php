@@ -9,12 +9,11 @@ class Response
      */
     public static function headers(
         $contentType = 'application/json',
-        $allowOrigin = '*',
         $allowMethods = 'GET, POST, PUT, DELETE, OPTIONS',
         $allowHeaders = 'X-Requested-With, Content-Type, Authorization'
     ) {
         header('Content-Type: ' . $contentType . '; charset=UTF-8');
-        header('Access-Control-Allow-Origin: ' . $allowOrigin);
+        header('Access-Control-Allow-Origin: ' . $_ENV['CLIENT_ADDRESS']);
         header('Access-Control-Allow-Methods: ' . $allowMethods);
         header('Access-Control-Allow-Headers: ' . $allowHeaders);
         header('Access-Control-Allow-Credentials: true');
@@ -29,7 +28,10 @@ class Response
      */
     public static function send($response)
     {
-        exit(json_encode($response));
+        if (is_array($response) || is_object($response)) {
+            $response = json_encode($response);
+        }
+        exit($response);
     }
 
     /**

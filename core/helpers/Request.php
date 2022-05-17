@@ -91,9 +91,8 @@ class Request
         return $_SERVER['HTTP_' . $header] ?? null;
     }
 
-
     /**
-     * Get Authorization header value.
+     * Get Authorization jwt access token
      * 
      * @return string
      */
@@ -102,13 +101,18 @@ class Request
         // Get authorization token from header
         $auth = isset($_SERVER['Authorization']) && preg_match('/Bearer\s(\S+)/', $_SERVER['Authorization'], $matches) ? $matches[1] : null;
 
-        $auth ?? $auth = isset($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches) ? $matches[1] : null;
-
-        // If no authorization token, get it from cookie
-        if (!$auth) {
-            $auth = isset($_COOKIE['jwt']) ? $_COOKIE['jwt'] : null;
-        }
+        $auth ??= isset($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches) ? $matches[1] : null;
 
         return $auth ?? false;
+    }
+
+    /**
+     * Get Refresh Token from httponly Cookie
+     * 
+     * @return string
+     */
+    public static function refreshToken()
+    {
+        return isset($_COOKIE['auth']) ? $_COOKIE['auth'] : false;
     }
 }

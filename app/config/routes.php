@@ -3,8 +3,8 @@
 /**
  * Routes Definition
  * 
- * ? Allowed Headers:
- * ? - Allowed origins: *
+ * ? Headers:
+ * ? - Allowed origins: $_ENV['CLIENT_ADDRESS']
  * ? - Allowed methods: GET, POST, PUT, DELETE, OPTIONS
  * ? - Allowed headers: Content-Type, Authorization, X-Requested-With
  * ? - Allowed credentials: true

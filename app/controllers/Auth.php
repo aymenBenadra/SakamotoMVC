@@ -6,6 +6,7 @@ use App\Models\Example;
 use Core\{Controller, Router};
 use Core\Helpers\Request;
 use Core\Helpers\Response;
+use Exception;
 use Firebase\JWT\{JWT, Key};
 
 /**
@@ -40,18 +41,12 @@ class Auth extends Controller
 
         if (!$this->model('Example')->add($data)) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
 
-        $example = $this->model('Example')->get(
-            $this->model('Example')->getLastInsertedId()
-        );
-
         Response::send([
-            'status' => 'success',
-            'data' => $example
+            'message' => 'Registered successfully',
         ]);
     }
 
@@ -65,10 +60,9 @@ class Auth extends Controller
     {
         $example = $this->model('Example')->getBy('headerRef', $data['headerRef']);
 
-        Response::send([
-            'status' => 'success',
-            'data' => $example
-        ]);
+        Response::send(
+            $example
+        );
     }
 
     /**
@@ -84,7 +78,6 @@ class Auth extends Controller
 
         if (!$this->model('Example')->add($data)) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
@@ -92,8 +85,7 @@ class Auth extends Controller
         unset($data['password']);
 
         Response::send([
-            'status' => 'success',
-            'data' => $data
+            'message' => 'Registered successfully',
         ]);
     }
 
@@ -109,37 +101,63 @@ class Auth extends Controller
 
         if (!password_verify($data['password'], $example->password)) {
             Router::abort(401, json_encode([
-                'status' => 'error',
                 'message' => 'Invalid password'
             ]));
         }
 
-        $secret_key = $_ENV['JWT_SECRET_KEY'];
-        $issuer_claim = $_ENV['SERVER_ADDRESS']; // this can be the servername
-        $audience_claim = $_ENV['CLIENT_ADDRESS'];
-        $issuedat_claim = time(); // issued at
-        // $notbefore_claim = $issuedat_claim + 10; //not before in seconds
-        $expire_claim = $issuedat_claim + 600; // expire time in seconds (10 minutes)
-        $payload = array(
-            "iss" => $issuer_claim,
-            "aud" => $audience_claim,
-            "iat" => $issuedat_claim,
-            // "nbf" => $notbefore_claim,
-            "exp" => $expire_claim,
-            "sub" => $example->username
+        // Create Refresh Token
+        $refreshToken = $this->createToken($example->username, $_ENV['JWT_REFRESH_EXP_DELTA_SECONDS']);
+
+        setcookie(
+            name: 'auth',
+            value: $refreshToken,
+            expires_or_options: time() + $_ENV['JWT_REFRESH_EXP_DELTA_SECONDS'],
+            httponly: true
         );
+        // Create Access Token
+        $accessToken = $this->createToken($example->username, $_ENV['JWT_ACCESS_EXP_DELTA_SECONDS']);
 
-        $jwt = JWT::encode($payload, $secret_key, "HS256");
-
-        // Set expirable cookie for JWT
-        setcookie(name: 'jwt', value: $jwt, expires_or_options: $expire_claim, httponly: true);
+        unset($example->password, $example->id);
+        $example->avatar = file_get_contents(dirname(dirname(__DIR__)) . "/public/identicons/" . $example->avatar);
+        $example->accessToken = $accessToken;
 
         Response::send(
-            array(
-                "message" => "Successful login.",
-                "jwt" => $jwt
-            )
+            $example
         );
+    }
+
+    /**
+     * Refresh Access Token
+     * 
+     * @param array $data
+     * @return void
+     */
+    public function refresh()
+    {
+        $refreshToken = Request::refreshToken();
+
+        // Check if refresh token is valid
+        try {
+            if (!$refreshToken) {
+                throw new Exception('No refresh token found');
+            }
+
+            $token = JWT::decode($refreshToken, new Key($_ENV['JWT_SECRET_KEY'], $_ENV['JWT_ALGORITHM']));
+
+            // Check if Example exists
+            $example = (new Example())->getBy('username', $token->sub);
+            if (!$example) {
+                throw new Exception('Example not found');
+            }
+
+            Response::send([
+                'accessToken' => $this->createToken($example->username, $_ENV['JWT_ACCESS_EXP_DELTA_SECONDS'])
+            ]);
+        } catch (Exception $e) {
+            Router::abort(401, [
+                'message' => 'Unauthorized: ' . $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -149,10 +167,10 @@ class Auth extends Controller
      */
     public function logoutJWT()
     {
-        setcookie(name: 'jwt', value: '', expires_or_options: time() - 3600, httponly: true);
+        setcookie(name: 'auth', value: '', expires_or_options: time() - 1, httponly: true);
 
         Response::send([
-            'status' => 'Logged out successfully!'
+            'message' => 'Logged out successfully!'
         ]);
     }
 
@@ -169,8 +187,37 @@ class Auth extends Controller
             return null;
         }
 
-        $token = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], "HS256"));
+        $token = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], $_ENV['JWT_ALGORITHM']));
 
-        return (new Example)->getBy('username', $token->sub);
+        $example = (new Example)->getBy('username', $token->sub);
+
+        unset($example->password,$example->id);
+
+        return$example;
+    }
+
+    /**
+     * Create token for user
+     * 
+     * @param string $sub
+     * @param int $exp
+     * @return string
+     */
+    public static function createToken($sub, $exp)
+    {
+        $secret_key = $_ENV['JWT_SECRET_KEY'];
+        $issuer_claim = $_ENV['SERVER_ADDRESS']; // this can be the servername
+        $audience_claim = $_ENV['CLIENT_ADDRESS'];
+        $issuedat_claim = time(); // issued at
+        $expire_claim = $issuedat_claim + $exp; // expire time in seconds (24 hours from now)
+        $payload = array(
+            "iss" => $issuer_claim,
+            "aud" => $audience_claim,
+            "iat" => $issuedat_claim,
+            "exp" => $expire_claim,
+            "sub" => $sub
+        );
+
+        return JWT::encode($payload, $secret_key, $_ENV['JWT_ALGORITHM']);
     }
 }

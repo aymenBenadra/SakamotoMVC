@@ -39,16 +39,13 @@ class Api extends Controller
 
         if ($examples === false) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
 
-        Response::send([
-            'status' => 'success',
-            'data' => $examples,
-            'count' => count($examples)
-        ]);
+        Response::send(
+            $examples
+        );
     }
 
     /**
@@ -59,10 +56,9 @@ class Api extends Controller
      */
     public function show($data = [])
     {
-        Response::send([
-            'status' => 'success',
-            'data' => $this->model->get($data['id'])
-        ]);
+        Response::send(
+            $this->model->get($data['id'])
+        );
     }
 
     /**
@@ -78,18 +74,12 @@ class Api extends Controller
 
         if (!$this->model->add($data)) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
 
-        $example = $this->model->get(
-            $this->model->getLastInsertedId()
-        );
-
         Response::send([
-            'status' => 'success',
-            'data' => $example
+            'message' => 'Created successfully'
         ]);
     }
 
@@ -106,16 +96,12 @@ class Api extends Controller
 
         if (!$this->model->update($id, $data)) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
 
-        $example = $this->model->get($id);
-
         Response::send([
-            'status' => 'success',
-            'data' => $example
+            'message' => 'Updated successfully'
         ]);
     }
 
@@ -129,13 +115,12 @@ class Api extends Controller
     {
         if (!$this->model->delete($data['id'])) {
             Router::abort(500, json_encode([
-                'status' => 'error',
                 'message' => 'Server error'
             ]));
         }
 
         Response::send([
-            'status' => 'success'
+            'message' => 'Deleted successfully'
         ]);
     }
 }
