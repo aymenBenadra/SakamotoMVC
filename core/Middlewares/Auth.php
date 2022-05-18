@@ -58,7 +58,7 @@ class Auth
 
             case 'admin':
                 // Check if exampleJWToken exists
-                if ($this->checkJWT($exampleJWToken)) {
+                if ($this->checkJWT($exampleJWToken, "admin")) {
                     return;
                 }
                 break;
@@ -106,28 +106,46 @@ class Auth
      * Checks if JWT is valid and returns true if it does
      * 
      * @param  string $jwt
+     * @param  string $role
      * @return boolean
      */
-    public function checkJWT($jwt)
+    public function checkJWT($jwt, $role = null)
     {
-        if (!$jwt) {
-            return false;
-        }
-        try {
-            $token = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], "HS256"));
+        $refreshToken = Request::refreshToken();
 
-            // Check if Example exists
-            $example = (new Example())->getBy('id', $token->sub);
+        try {
+            if (!$refreshToken) {
+                throw new Exception('Invalid Refresh Token');
+            }
+            if (!$jwt) {
+                throw new Exception('Invalid Access Token');
+            }
+
+            $accessToken = JWT::decode($jwt, new Key($_ENV['JWT_SECRET_KEY'], $_ENV['JWT_ALGORITHM']));
+            $refreshToken = JWT::decode($refreshToken, new Key($_ENV['JWT_SECRET_KEY'], $_ENV['JWT_ALGORITHM']));
+
+            // Check if access token is valid
+            if ($accessToken->sub !== $refreshToken->sub) {
+                throw new Exception('Invalid Access Token');
+            }
+
+
+            // Check if User exists
+            $example = (new Example())->getBy('username', $accessToken->sub);
             if (!$example) {
-                throw new Exception('Admin not found');
+                throw new Exception('User not found');
+            }
+
+            // Check if user is authorized
+            if ($role === 'admin' && $example->is_admin !== 1) {
+                throw new Exception('You\'re not allowed to access this page');
             }
 
             return true;
         } catch (Exception $e) {
-            Router::abort(401, json_encode([
-                'status' => 'error',
+            Router::abort(401, [
                 'message' => 'Unauthorized: ' . $e->getMessage()
-            ]));
+            ]);
         }
     }
 }

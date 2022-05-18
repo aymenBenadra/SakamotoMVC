@@ -191,7 +191,7 @@ class Auth extends Controller
 
         $example = (new Example)->getBy('username', $token->sub);
 
-        unset($example->password,$example->id);
+        unset($example->password);
 
         return$example;
     }
