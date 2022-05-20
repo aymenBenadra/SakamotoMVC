@@ -43,14 +43,22 @@ class Validation
 
         // Get the rules to validate 
         foreach ($fields as $field) {
-            $rulesToValidate[$field] = $this->rules[$scope][$field];
-        }
+            if (strpos($field, '/')) {
+                $field = explode('/', $field);
 
+                if (isset($data[$field[0]])) {
+                    $rulesToValidate[$field[0]] = $this->rules[$scope][$field[0]];
+                } else {
+                    $rulesToValidate[$field[1]] = $this->rules[$scope][$field[1]];
+                }
+            } else {
+                $rulesToValidate[$field] = $this->rules[$scope][$field];
+            }
+        }
 
         // if data fields count is not equal to the rules count, return false
         if (count($data) !== count($rulesToValidate)) {
             Router::abort(400, [
-                'status' => 'error',
                 'message' => 'The request data fields count is not equal to the rules count'
             ]);
         }
@@ -58,7 +66,6 @@ class Validation
         // Chack data fields validity
         if (array_diff(array_keys($data), array_keys($rulesToValidate))) {
             Router::abort(400, [
-                'status' => 'error',
                 'message' => 'The request data fields are not valid'
             ]);
         }
@@ -72,7 +79,6 @@ class Validation
 
             if ($result !== true) {
                 Router::abort(400, [
-                    'status' => 'error',
                     'message' => ucfirst($field) . ': ' . $result[0]
                 ]);
             }

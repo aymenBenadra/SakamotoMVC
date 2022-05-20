@@ -21,6 +21,9 @@
  * 
  * ? Validation MIDDLEWARE PARAMETERS:
  * ? - - field1|field2|field3: List of fields to check if they are valid (e.g. email, password, etc.)
+ * ? - - - if you want a field to be dynamic, you can use the following syntax:
+ * ? - - - - field1/field2: check if field1 exists, if not check if field2 exists
+ * 
  * ? - - scope: Scope of the validation rules (e.g. all, Example1, Example2, etc.)
  * -----------------------------------------------------------------------------
  * ? Example:

@@ -392,8 +392,10 @@ class Validator
         $model = "App\\Models\\$model";
         $model = new $model;
 
-        if ($model->getBy($column, $value)) {
-            return 'The value is not unique';
+        if (Request::method() == 'POST' || Request::method() == 'PUT' || Request::method() == 'PATCH') {
+            if ($model->getBy($column, $value)) {
+                return 'The value is not unique';
+            }
         }
 
         return true;
